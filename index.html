@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laboratorios — Dr. Miguel Soto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <style>
+    :root {
+      --bg: #f1ebe1; --bg-soft: #ebe4d6; --card: #ffffff; --border: #d8cfbf; --border-soft: #ebe4d6;
+      --text: #1a1a1a; --text-muted: #8a8378; --text-faint: #b3a895; --black: #1a1a1a;
+      --accent: #b09372; --accent-dark: #8e7456; --success: #5a7a4e; --error: #a13a3a; --warn: #a9782a;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.03); --shadow-md: 0 2px 12px rgba(0,0,0,0.06);
+      --serif: 'Playfair Display', Georgia, serif; --sans: 'Inter', -apple-system, system-ui, sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: var(--bg); font-family: var(--sans); color: var(--text); font-size: 14px; line-height: 1.5; min-height: 100vh; -webkit-font-smoothing: antialiased; }
+    .hidden { display: none !important; }
+    .serif { font-family: var(--serif); font-weight: 400; }
+
+    .topbar { display: flex; align-items: center; justify-content: center; padding: 14px 24px; gap: 18px; font-size: 0.72rem; color: var(--text-muted); background: var(--bg); }
+    .topbar .email { letter-spacing: 0.04em; }
+    .topbar .salir { color: var(--text); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; background: none; border: 0; padding: 0; font-size: inherit; font-family: inherit; }
+    .topbar .salir:hover { color: var(--accent-dark); }
+
+    .hero { background: var(--black); color: #fff; padding: 26px 40px; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 24px; }
+    .hero-left .step-num { font-family: var(--serif); font-size: 0.75rem; letter-spacing: 0.18em; color: #b3a895; }
+    .hero-left .step-name { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; color: #fff; margin-top: 2px; font-weight: 500; }
+    .hero-logo-img { height: 56px; width: auto; display: block; margin: 0 auto; }
+    .hero-right { text-align: right; }
+    .hero-right .doc-name { font-size: 0.72rem; letter-spacing: 0.22em; text-transform: uppercase; font-weight: 500; }
+    .hero-right .doc-title { font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: #b3a895; margin-top: 2px; }
+
+    main { max-width: 980px; margin: 48px auto; padding: 0 24px; }
+    .view-title { font-family: var(--serif); font-size: 2rem; font-weight: 400; text-align: center; margin: 0 0 8px 0; letter-spacing: -0.01em; }
+    .view-subtitle { text-align: center; color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 36px; }
+    .card { background: var(--card); border: 1px solid var(--border-soft); border-radius: 4px; padding: 28px; box-shadow: var(--shadow-sm); margin-bottom: 20px; }
+
+    label { display: block; font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; }
+    input[type="text"], select, textarea { width: 100%; padding: 12px 14px; font-family: var(--sans); font-size: 0.92rem; color: var(--text); background: #fff; border: 1px solid var(--border); border-radius: 3px; outline: none; transition: border-color 0.15s; }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    input::placeholder { color: var(--text-faint); }
+    textarea { min-height: 260px; line-height: 1.6; resize: vertical; }
+    select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'><path fill='%238a8378' d='M6 8L0 0h12z'/></svg>"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+    .form-group { margin-bottom: 18px; }
+
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 13px 28px; font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; border: 0; border-radius: 3px; cursor: pointer; transition: all 0.15s; gap: 8px; }
+    .btn-primary { background: var(--black); color: #fff; }
+    .btn-primary:hover:not(:disabled) { background: #000; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { background: var(--bg-soft); border-color: var(--accent); }
+    .btn-ghost { background: none; color: var(--accent-dark); padding: 8px 0; }
+    .btn-ghost:hover { color: var(--text); }
+    .btn-row { display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; flex-wrap: wrap; }
+
+    /* PESTAÑAS */
+    .tabs { display: flex; justify-content: center; gap: 4px; margin-bottom: 28px; flex-wrap: wrap; }
+    .tab { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 18px; font-family: var(--sans); font-size: 0.72rem; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; color: var(--text-muted); cursor: pointer; }
+    .tab:hover { color: var(--text); }
+    .tab.on { color: var(--text); border-bottom-color: var(--accent); }
+    .tab .n { display: inline-block; min-width: 20px; padding: 1px 7px; margin-left: 6px; border-radius: 100px; background: var(--bg-soft); font-size: 0.65rem; letter-spacing: 0.04em; }
+    .tab.on .n { background: var(--black); color: #fff; }
+
+    /* LISTA */
+    .results { display: flex; flex-direction: column; gap: 8px; min-height: 60px; }
+    .result-item { padding: 16px 20px; background: #fff; border: 1px solid var(--border-soft); border-radius: 3px; cursor: pointer; transition: all 0.12s; }
+    .result-item:hover { border-color: var(--accent); box-shadow: var(--shadow-sm); }
+    .result-item .r-name { font-family: var(--serif); font-size: 1.05rem; color: var(--text); }
+    .result-item .r-id { color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.16em; margin-left: 10px; }
+    .result-item .r-meta { color: var(--text-muted); font-size: 0.82rem; margin-top: 6px; }
+    .result-item .r-meta span { margin-right: 16px; }
+    .results-empty { text-align: center; padding: 32px; color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
+    .pill { display: inline-block; padding: 2px 10px; background: var(--bg-soft); border-radius: 100px; font-size: 0.65rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); margin-left: 8px; vertical-align: 2px; }
+    .pill.apto { background: #e6f0e1; color: var(--success); }
+    .pill.apto_con_observacion { background: #f6ecd9; color: var(--warn); }
+    .pill.revisar, .pill.llamar { background: #fbe6e6; color: var(--error); }
+
+    /* DETALLE */
+    .ficha { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .ficha div b { display: block; font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; margin-bottom: 2px; }
+    .section-title { font-family: var(--serif); font-size: 1.4rem; margin: 0 0 4px 0; letter-spacing: -0.01em; }
+    .section-subtitle { color: var(--text-muted); font-size: 0.7rem; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 20px; }
+    table.res { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+    table.res th { text-align: left; font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); font-weight: 500; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    table.res td { padding: 8px 10px; border-bottom: 1px solid var(--border-soft); vertical-align: top; }
+    table.res tr.sec td { background: var(--bg); font-size: 0.68rem; letter-spacing: 0.18em; text-transform: uppercase; color: var(--accent-dark); font-weight: 500; }
+    table.res td.v { font-weight: 600; white-space: nowrap; }
+    table.res td.ref { color: var(--text-muted); white-space: pre-line; }
+    .dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 8px; vertical-align: 1px; background: var(--border); }
+    .dot.normal { background: var(--success); } .dot.alto, .dot.bajo { background: var(--error); } .dot.sin_rango { background: var(--border); }
+    .flag { font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--error); margin-left: 6px; }
+    .flag.disc { color: var(--warn); }
+    .aviso { padding: 14px 18px; border-radius: 3px; margin-bottom: 18px; font-size: 0.88rem; }
+    .aviso.rojo { background: #fbe6e6; border: 1px solid #e7c3c3; color: var(--error); }
+    .aviso.ambar { background: #f6ecd9; border: 1px solid #e6d2ad; color: var(--warn); }
+    .aviso.verde { background: #e6f0e1; border: 1px solid #c1d4b8; color: var(--success); }
+    ul.hz { margin: 0; padding-left: 18px; } ul.hz li { margin-bottom: 6px; }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .cultivo td.S { color: var(--success); font-weight: 600; } .cultivo td.R { color: var(--error); font-weight: 600; } .cultivo td.I { color: var(--warn); font-weight: 600; }
+
+    .login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .login-card { background: #fff; border: 1px solid var(--border-soft); border-radius: 6px; padding: 48px 40px; max-width: 420px; width: 100%; text-align: center; box-shadow: var(--shadow-md); }
+    .login-card .login-logo-img { height: 96px; width: auto; margin: 0 auto 8px; display: block; }
+    .login-card .login-doc { font-size: 0.7rem; letter-spacing: 0.22em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 32px; }
+    .login-card h1 { font-family: var(--serif); font-size: 1.6rem; font-weight: 400; margin: 0 0 6px 0; }
+    .login-card .login-sub { color: var(--text-muted); font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 28px; }
+    .login-card .login-error { color: var(--error); font-size: 0.82rem; margin-top: 16px; min-height: 18px; }
+    .login-card .login-note { color: var(--text-muted); font-size: 0.78rem; margin-top: 24px; line-height: 1.5; font-style: italic; }
+    #google-signin-btn { display: flex; justify-content: center; margin-top: 8px; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--black); color: #fff; padding: 12px 22px; border-radius: 3px; font-size: 0.82rem; z-index: 2000; }
+
+    @media (max-width: 700px) {
+      .hero { padding: 18px 20px; grid-template-columns: 1fr; text-align: center; gap: 12px; }
+      .hero-right, .hero-left { text-align: center; }
+      main { margin: 24px auto; padding: 0 16px; }
+      .view-title { font-size: 1.5rem; }
+      .card { padding: 20px; }
+      .ficha, .two { grid-template-columns: 1fr 1fr; }
+      table.res { font-size: 0.8rem; } table.res td.ref { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <img src="logo_ms_black.png" alt="Dr. Miguel Soto" class="login-logo-img">
+    <div class="login-doc">Dr. Miguel Soto · Cirujano Plástico</div>
+    <h1 class="serif">Laboratorios</h1>
+    <div class="login-sub">Inicia sesión con tu cuenta autorizada</div>
+    <div id="google-signin-btn"></div>
+    <div class="login-error" id="login-error"></div>
+    <div class="login-note">Solo cuentas autorizadas por el Dr. Soto pueden acceder.</div>
+  </div>
+</div>
+
+<div id="app-wrapper" class="hidden">
+  <header class="topbar">
+    <span class="email" id="topbar-email">—</span>
+    <span style="opacity: 0.4;">·</span>
+    <button class="salir" id="btn-salir">salir</button>
+  </header>
+
+  <div class="hero">
+    <div class="hero-left">
+      <div class="step-num">LABORATORIOS</div>
+      <div class="step-name" id="hero-step">Bandeja</div>
+    </div>
+    <img src="logo_ms_white.png" alt="MS" class="hero-logo-img">
+    <div class="hero-right">
+      <div class="doc-name">Dr. Miguel Soto</div>
+      <div class="doc-title">Cirujano Plástico</div>
+    </div>
+  </div>
+
+  <main>
+    <section id="view-lista">
+      <h1 class="view-title serif">Resultados de laboratorio</h1>
+      <div class="view-subtitle">Microtec · Preoperatorios y cultivos</div>
+      <div class="tabs" id="tabs"></div>
+      <div class="card">
+        <div class="form-group" style="margin-bottom: 20px;">
+          <input type="text" id="filtro" placeholder="Filtrar por nombre…" autocomplete="off">
+        </div>
+        <div class="results" id="lista"><div class="results-empty">Cargando…</div></div>
+      </div>
+    </section>
+
+    <section id="view-detalle" class="hidden">
+      <button class="btn btn-ghost" id="btn-volver">‹ Volver a la bandeja</button>
+      <h1 class="view-title serif" id="d-nombre">—</h1>
+      <div class="view-subtitle" id="d-sub">—</div>
+      <div id="d-avisos"></div>
+
+      <div class="card" id="d-asignar-card">
+        <div class="section-title serif">Asignar paciente</div>
+        <div class="section-subtitle">Busque en la base de datos · nunca se asigna a ciegas</div>
+        <div id="d-candidatos"></div>
+        <div class="form-group">
+          <label for="d-buscar">Nombre, teléfono o número de paciente</label>
+          <input type="text" id="d-buscar" autocomplete="off" placeholder="Mínimo 3 caracteres…">
+        </div>
+        <div class="results" id="d-busqueda"></div>
+      </div>
+
+      <div class="card">
+        <div class="ficha" id="d-ficha"></div>
+        <div class="btn-row" style="justify-content: flex-start; margin-top: 18px;">
+          <button class="btn btn-secondary" id="btn-pdf">Ver PDF original</button>
+        </div>
+      </div>
+
+      <div class="card" id="d-analisis-card">
+        <div class="section-title serif">Análisis</div>
+        <div class="section-subtitle">Borrador para el Dr. Soto · la postura es suya</div>
+        <div id="d-analisis"></div>
+      </div>
+
+      <div class="card" id="d-cultivo-card">
+        <div class="section-title serif">Cultivo</div>
+        <div class="section-subtitle">Germen y antibiograma</div>
+        <div id="d-cultivo"></div>
+      </div>
+
+      <div class="card">
+        <div class="section-title serif">Resultados</div>
+        <div class="section-subtitle">Semáforo calculado contra el rango impreso por el laboratorio</div>
+        <div style="overflow-x:auto;"><table class="res" id="d-tabla"></table></div>
+      </div>
+
+      <div class="card" id="d-carta-card">
+        <div class="section-title serif">Interpretación para el paciente</div>
+        <div class="section-subtitle">Se envía por Sophia junto con el PDF · edítela antes de aprobar</div>
+        <div class="form-group">
+          <label for="d-postura">Postura</label>
+          <select id="d-postura">
+            <option value="apto">Apto</option>
+            <option value="apto_con_observacion">Apto con observación</option>
+            <option value="revisar">Revisar antes de operar</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="d-carta">Carta</label>
+          <textarea id="d-carta"></textarea>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-secondary" id="btn-reanalizar">Volver a analizar</button>
+          <button class="btn btn-secondary" id="btn-guardar">Guardar borrador</button>
+          <button class="btn btn-primary" id="btn-aprobar">Aprobar</button>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+// ============================================================
+// CONFIG — poner aquí la URL /exec al publicar el Apps Script
+// ============================================================
+const API_URL = 'https://script.google.com/macros/s/AKfycbwu5F8NMMr-3ETUf2fk-lYfkm0pMd8Rrsre3y5LHyrPsNfz30G-b1c6I6GizRvoJlG6kA/exec';
+const CLIENT_ID = '536486651249-cu5iq19frldtvvpsd1mamnqlr0attuab.apps.googleusercontent.com';
+
+let googleToken = localStorage.getItem('lab_token') || '';
+let yo = { email: '', rol: '' };
+let todos = [];
+let pestana = 'por_revisar';
+let actual = null;
+
+const $ = id => document.getElementById(id);
+const show = id => $(id).classList.remove('hidden');
+const hide = id => $(id).classList.add('hidden');
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+function toast(t) { const d = document.createElement('div'); d.className = 'toast'; d.textContent = t; document.body.appendChild(d); setTimeout(() => d.remove(), 2800); }
+function decodeJWT(t) { try { return JSON.parse(decodeURIComponent(escape(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))))); } catch (e) { return null; } }
+
+async function api(action, payload = {}) {
+  if (!googleToken) return { ok: false, error: 'No hay sesión activa' };
+  if (/^PENDIENTE/.test(API_URL)) return { ok: false, error: 'Falta configurar la URL del servidor' };
+  try {
+    const r = await fetch(API_URL, { method: 'POST', credentials: 'omit', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ token: googleToken, action, ...payload }) });
+    return await r.json();
+  } catch (e) { return { ok: false, error: 'Conexión fallida: ' + e.message }; }
+}
+
+// ---------- sesión ----------
+window.handleGoogleSignIn = async function (resp) {
+  googleToken = resp.credential;
+  const p = decodeJWT(googleToken);
+  $('login-error').textContent = 'Verificando autorización…';
+  const r = await api('sesion');
+  if (!r.ok) { $('login-error').textContent = r.error === 'No autorizado' ? `Tu cuenta (${p && p.email}) no está autorizada. Contacta al Dr. Soto.` : r.error; googleToken = ''; return; }
+  localStorage.setItem('lab_token', googleToken);
+  entrar(r.data);
+};
+function initGoogle() {
+  if (!window.google || !google.accounts || !google.accounts.id) return setTimeout(initGoogle, 200);
+  google.accounts.id.initialize({ client_id: CLIENT_ID, callback: window.handleGoogleSignIn, auto_select: false, cancel_on_tap_outside: false });
+  google.accounts.id.renderButton($('google-signin-btn'), { theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', locale: 'es' });
+}
+$('btn-salir').onclick = () => { try { google.accounts.id.disableAutoSelect(); } catch (e) {} localStorage.removeItem('lab_token'); location.reload(); };
+
+function entrar(u) {
+  yo = u; hide('login-screen'); show('app-wrapper');
+  $('topbar-email').textContent = u.email + (u.rol ? ' · ' + u.rol : '');
+  if (u.rol !== 'medico') ['btn-aprobar', 'btn-reanalizar'].forEach(hide);
+  cargar();
+}
+(async function bootstrap() {
+  if (googleToken) {
+    const p = decodeJWT(googleToken);
+    if (p && p.exp * 1000 > Date.now()) { const r = await api('sesion'); if (r.ok) return entrar(r.data); }
+    googleToken = ''; localStorage.removeItem('lab_token');
+  }
+  initGoogle();
+})();
+
+// ---------- bandeja ----------
+const PESTANAS = [
+  { k: 'por_asignar', t: 'Por asignar' },
+  { k: 'por_revisar', t: 'Por revisar' },
+  { k: 'en_proceso', t: 'En proceso' },
+  { k: 'aprobado', t: 'Aprobados' }
+];
+function grupo(e) {
+  if (e.estado === 'por_asignar') return 'por_asignar';
+  if (e.estado === 'por_revisar') return 'por_revisar';
+  if (e.estado === 'aprobado' || e.estado === 'enviado') return 'aprobado';
+  return 'en_proceso';
+}
+const POSTURA_TXT = { apto: 'Apto', apto_con_observacion: 'Con observación', revisar: 'Revisar' };
+const fecha = s => { if (!s) return ''; const d = new Date(s.length <= 10 ? s + 'T12:00:00' : s); return isNaN(d) ? s : d.toLocaleDateString('es-MX', { day: 'numeric', month: 'short', year: 'numeric' }); };
+
+async function cargar() {
+  const r = await api('bandeja');
+  if (!r.ok) { $('lista').innerHTML = `<div class="results-empty">${esc(r.error)}</div>`; return; }
+  todos = r.data; pintaTabs(); pintaLista();
+}
+function pintaTabs() {
+  $('tabs').innerHTML = PESTANAS.map(p => `<button class="tab ${p.k === pestana ? 'on' : ''}" data-k="${p.k}">${p.t}<span class="n">${todos.filter(e => grupo(e) === p.k).length}</span></button>`).join('');
+  $('tabs').querySelectorAll('.tab').forEach(b => b.onclick = () => { pestana = b.dataset.k; pintaTabs(); pintaLista(); });
+}
+function pintaLista() {
+  const f = $('filtro').value.trim().toLowerCase();
+  const xs = todos.filter(e => grupo(e) === pestana).filter(e => !f || (e.paciente + ' ' + e.nombrePdf).toLowerCase().includes(f));
+  if (!xs.length) { $('lista').innerHTML = '<div class="results-empty">Nada en esta sección.</div>'; return; }
+  $('lista').innerHTML = xs.map(e => `
+    <div class="result-item" data-id="${esc(e.id)}">
+      <span class="r-name">${esc(e.paciente || e.nombrePdf)}</span>${e.pacienteId ? `<span class="r-id">#${esc(e.pacienteId)}</span>` : ''}
+      ${e.postura ? `<span class="pill ${esc(e.postura)}">${esc(POSTURA_TXT[e.postura] || e.postura)}</span>` : ''}
+      ${e.llamada ? '<span class="pill llamar">Llamar antes</span>' : ''}
+      ${e.error ? '<span class="pill revisar">Error</span>' : ''}
+      <div class="r-meta">
+        <span>${esc(e.tipo || 'laboratorio')}</span><span>Toma ${esc(fecha(e.fechaToma) || '—')}</span>
+        ${e.edad ? `<span>${esc(e.edad)} años · ${esc(e.sexo)}</span>` : ''}
+        ${e.faltantes ? `<span style="color: var(--warn);">Falta: ${esc(e.faltantes)}</span>` : ''}
+      </div>
+      ${e.fuera ? `<div class="r-meta" style="color: var(--error);">${esc(e.fuera)}</div>` : ''}
+    </div>`).join('');
+  $('lista').querySelectorAll('.result-item').forEach(d => d.onclick = () => abrir(d.dataset.id));
+}
+$('filtro').oninput = pintaLista;
+
+// ---------- detalle ----------
+async function abrir(id) {
+  const r = await api('estudio', { id });
+  if (!r.ok) return toast(r.error);
+  actual = r.data;
+  hide('view-lista'); show('view-detalle'); window.scrollTo(0, 0);
+  $('hero-step').textContent = 'Estudio ' + actual.Estudio_ID;
+  pintaDetalle();
+}
+$('btn-volver').onclick = () => { hide('view-detalle'); show('view-lista'); $('hero-step').textContent = 'Bandeja'; actual = null; cargar(); };
+
+function pintaDetalle() {
+  const a = actual;
+  $('d-nombre').textContent = a.Paciente_Nombre || a.Nombre_PDF || a.Archivo;
+  $('d-sub').textContent = [a.Tipo, a.Paciente_ID ? 'Paciente #' + a.Paciente_ID : 'Sin asignar', 'Orden ' + (a.Orden || '—')].join(' · ');
+
+  let av = '';
+  if (a.Requiere_Llamada) av += `<div class="aviso rojo"><b>Llamar al paciente antes de enviar.</b> ${esc(a.Requiere_Llamada)}. Aunque se apruebe, este resultado no sale automáticamente.</div>`;
+  if (a.Faltantes) av += `<div class="aviso ambar"><b>Falta según su protocolo:</b> ${esc(a.Faltantes)}. Puede llegar en otro correo.</div>`;
+  if (a.Discrepancias) av += `<div class="aviso ambar"><b>Revise contra el PDF:</b> la marca del laboratorio y el cálculo no coinciden en ${esc(a.Discrepancias)}.</div>`;
+  if (a.Error) av += `<div class="aviso rojo">${esc(a.Error)}</div>`;
+  if (a.Estado === 'aprobado') av += `<div class="aviso verde">Aprobado por ${esc(a.Aprobado_Por)} el ${esc(fecha(a.Aprobado_El))}.</div>`;
+  $('d-avisos').innerHTML = av;
+
+  // asignación
+  const sinAsignar = !a.Paciente_ID;
+  $('d-asignar-card').classList.toggle('hidden', !sinAsignar && a.Asignacion !== 'pendiente');
+  $('d-candidatos').innerHTML = a.Candidatos ? '<label>Posibles coincidencias</label><div class="results" style="margin-bottom: 20px;">' +
+    a.Candidatos.split(' | ').filter(Boolean).map(c => { const id = c.split(' ')[0]; return `<div class="result-item" data-pac="${esc(id)}"><span class="r-name">${esc(c.slice(id.length + 1).replace(/\s*\(\d+\/\d+\)$/, ''))}</span><span class="r-id">#${esc(id)}</span><span class="pill">${esc((c.match(/\((\d+\/\d+)\)$/) || [])[1] || '')} palabras</span></div>`; }).join('') + '</div>' : '';
+  $('d-candidatos').querySelectorAll('[data-pac]').forEach(d => d.onclick = () => asignar(d.dataset.pac, d.querySelector('.r-name').textContent));
+
+  $('d-ficha').innerHTML = [
+    ['Nombre en el PDF', a.Nombre_PDF], ['Edad · sexo', (a.Edad || '—') + ' · ' + (a.Sexo || '—')],
+    ['Fecha de toma', fecha(a.Fecha_Toma)], ['Recibido', fecha(a.Recibido)],
+    ['ID Microtec', a.ID_Microtec || '—'], ['Teléfono', a.Telefono || '—'],
+    ['Asignación', a.Asignacion || '—'], ['Expedientes', a.Repartido ? a.Repartido.split(' · ').slice(0, 3).join(', ') : 'Pendiente']
+  ].map(([k, v]) => `<div><b>${esc(k)}</b>${esc(v || '—')}</div>`).join('');
+
+  // análisis
+  let hz = [];
+  try { hz = JSON.parse(a.Hallazgos_JSON || '[]'); } catch (e) {}
+  $('d-analisis-card').classList.toggle('hidden', !a.Resumen);
+  $('d-analisis').innerHTML = !a.Resumen ? '' : `
+    <p style="margin-top:0;">${esc(a.Resumen)}</p>
+    <div class="two">
+      <div><label>Hallazgos</label>${hz.length ? '<ul class="hz">' + hz.map(h => `<li><b>${esc(h.prueba)} ${esc(h.valor)}</b> — ${esc(h.lectura)}</li>`).join('') + '</ul>' : '<span style="color:var(--text-muted)">Sin hallazgos relevantes.</span>'}</div>
+      <div><label>Recomendaciones</label>${a.Recomendaciones ? '<ul class="hz">' + a.Recomendaciones.split(' · ').map(x => `<li>${esc(x)}</li>`).join('') + '</ul>' : '—'}</div>
+    </div>`;
+
+  // cultivo
+  let cu = null; try { cu = a.Cultivo_JSON ? JSON.parse(a.Cultivo_JSON) : null; } catch (e) {}
+  $('d-cultivo-card').classList.toggle('hidden', !cu);
+  if (cu) $('d-cultivo').innerHTML = `
+    <p style="margin-top:0;"><b>${esc(cu.organismo || 'Sin desarrollo')}</b> ${cu.cantidad ? '· ' + esc(cu.cantidad) : ''} ${cu.muestra ? '· ' + esc(cu.muestra) : ''}</p>
+    ${cu.gram ? `<p style="color:var(--text-muted)">Gram: ${esc(cu.gram)}</p>` : ''}
+    ${(cu.antibiograma || []).length ? `<table class="res cultivo"><tr><th>Antibiótico</th><th>Interpretación</th><th>CIM</th></tr>${cu.antibiograma.map(x => `<tr><td>${esc(x.antibiotico)}</td><td class="${esc(x.interpretacion)}">${esc({ S: 'Sensible', R: 'Resistente', I: 'Intermedio' }[x.interpretacion] || x.interpretacion)}</td><td>${esc(x.cim)}</td></tr>`).join('')}</table>` : ''}`;
+
+  // tabla
+  let sec = null, filas = '';
+  (a.resultados || []).forEach(r => {
+    if (r.Seccion !== sec) { sec = r.Seccion; if (sec) filas += `<tr class="sec"><td colspan="4">${esc(sec)}</td></tr>`; }
+    const fuera = r.Marca_Codigo === 'alto' || r.Marca_Codigo === 'bajo';
+    filas += `<tr><td><span class="dot ${esc(r.Marca_Codigo)}"></span>${esc(r.Prueba)}</td>
+      <td class="v" style="${fuera ? 'color: var(--error)' : ''}">${esc(r.Valor)} <span style="font-weight:400;color:var(--text-muted)">${esc(r.Unidad)}</span>${fuera ? `<span class="flag">${esc(r.Marca_Codigo)}</span>` : ''}${r.Discrepancia ? '<span class="flag disc">revisar</span>' : ''}</td>
+      <td class="ref">${esc(r.Referencia)}</td></tr>`;
+  });
+  $('d-tabla').innerHTML = '<tr><th>Prueba</th><th>Resultado</th><th>Referencia</th></tr>' + (filas || '<tr><td colspan="3" class="results-empty">Todavía no se ha leído el PDF.</td></tr>');
+
+  // carta
+  $('d-carta-card').classList.toggle('hidden', !a.Paciente_ID);
+  $('d-postura').value = a.Postura || 'apto';
+  $('d-carta').value = a.Carta || '';
+}
+
+// buscador de pacientes
+let tBusca = null;
+$('d-buscar').oninput = () => {
+  clearTimeout(tBusca);
+  const q = $('d-buscar').value.trim();
+  if (q.length < 3) { $('d-busqueda').innerHTML = ''; return; }
+  tBusca = setTimeout(async () => {
+    $('d-busqueda').innerHTML = '<div class="results-empty">Buscando…</div>';
+    const r = await api('buscarPaciente', { q });
+    if (!r.ok) { $('d-busqueda').innerHTML = `<div class="results-empty">${esc(r.error)}</div>`; return; }
+    $('d-busqueda').innerHTML = r.data.length ? r.data.map(p => `<div class="result-item" data-pac="${esc(p.id)}"><span class="r-name">${esc(p.nombre)}</span><span class="r-id">#${esc(p.id)}</span><div class="r-meta">${esc(p.tel || '')}</div></div>`).join('') : '<div class="results-empty">Sin coincidencias.</div>';
+    $('d-busqueda').querySelectorAll('[data-pac]').forEach(d => d.onclick = () => asignar(d.dataset.pac, d.querySelector('.r-name').textContent));
+  }, 300);
+};
+async function asignar(pacienteId, nombre) {
+  if (!confirm(`¿Asignar este resultado a ${nombre} (#${pacienteId})?`)) return;
+  const r = await api('asignar', { id: actual.Estudio_ID, pacienteId });
+  if (!r.ok) return toast(r.error);
+  toast('Asignado. Se analizará en la próxima corrida.');
+  abrir(actual.Estudio_ID);
+}
+
+$('btn-pdf').onclick = async () => {
+  const r = await api('pdf', { id: actual.Estudio_ID });
+  if (!r.ok) return toast(r.error);
+  const bin = Uint8Array.from(atob(r.data.b64), c => c.charCodeAt(0));
+  window.open(URL.createObjectURL(new Blob([bin], { type: 'application/pdf' })), '_blank');
+};
+$('btn-guardar').onclick = async () => {
+  const r = await api('guardarCarta', { id: actual.Estudio_ID, carta: $('d-carta').value });
+  toast(r.ok ? 'Borrador guardado' : r.error);
+};
+$('btn-reanalizar').onclick = async () => {
+  toast('Analizando…');
+  const r = await api('reanalizar', { id: actual.Estudio_ID });
+  if (!r.ok) return toast(r.error);
+  abrir(actual.Estudio_ID);
+};
+$('btn-aprobar').onclick = async () => {
+  if (!$('d-carta').value.trim()) return toast('La carta está vacía');
+  if (!confirm('¿Aprobar la postura y la carta?' + (actual.Requiere_Llamada ? '\n\nEste resultado requiere llamada: no se enviará por Sophia de forma automática.' : ''))) return;
+  const r = await api('aprobar', { id: actual.Estudio_ID, postura: $('d-postura').value, carta: $('d-carta').value });
+  if (!r.ok) return toast(r.error);
+  toast('Aprobado');
+  abrir(actual.Estudio_ID);
+};
+</script>
+</body>
+</html>
