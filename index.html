@@ -77,6 +77,7 @@
     .results-empty { text-align: center; padding: 32px; color: var(--text-muted); font-size: 0.85rem; font-style: italic; }
     .pill { display: inline-block; padding: 2px 10px; background: var(--bg-soft); border-radius: 100px; font-size: 0.65rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); margin-left: 8px; vertical-align: 2px; }
     .pill.apto { background: #e6f0e1; color: var(--success); }
+    .tab-txt { max-width: 640px; margin: -8px auto 22px; text-align: center; font-size: 13px; line-height: 1.55; color: var(--text-muted); }
     .pill.apto_con_observacion { background: #f6ecd9; color: var(--warn); }
     .pill.revisar, .pill.llamar { background: #fbe6e6; color: var(--error); }
 
@@ -163,6 +164,7 @@
       <h1 class="view-title serif">Resultados de laboratorio</h1>
       <div class="view-subtitle">Microtec · Preoperatorios y cultivos</div>
       <div class="tabs" id="tabs"></div>
+      <div class="tab-txt" id="tab-txt"></div>
       <div class="card">
         <div class="form-group" style="margin-bottom: 20px;">
           <input type="text" id="filtro" placeholder="Filtrar por nombre…" autocomplete="off">
@@ -304,12 +306,24 @@ const PESTANAS = [
   { k: 'por_asignar', t: 'Por asignar' },
   { k: 'por_revisar', t: 'Por revisar' },
   { k: 'en_proceso', t: 'En proceso' },
-  { k: 'aprobado', t: 'Aprobados' }
+  { k: 'aprobado', t: 'Aprobados' },
+  { k: 'duplicado', t: 'Duplicados' }
 ];
+// Lo que significa cada pestaña, dicho debajo de ellas para que nadie tenga que adivinarlo
+const PESTANA_TXT = {
+  por_asignar: 'Resultados que no se pudieron amarrar solos a un paciente de la base: el nombre no aparece, o aparece más de una vez. Ábralo, busque al paciente y asígnelo; desde ese momento se analiza y se reparte a los tres expedientes.',
+  por_revisar: 'Ya tienen paciente y análisis. Falta que usted revise la postura y la carta, y apruebe.',
+  en_proceso: 'Se están leyendo o analizando. Pasan solos a «Por revisar» en la siguiente corrida (cada 10 minutos).',
+  aprobado: 'Revisados y aprobados por usted.',
+  duplicado: 'Microtec mandó el mismo estudio dos veces. Aquí queda la copia repetida; el original sigue en su pestaña. No hay que hacer nada.'
+};
+// Más reciente arriba: por fecha de toma, y si no la hay, por cuándo llegó el correo
+const claveFecha = e => String(e.fechaToma || '').slice(0, 10) || String(e.recibido || '').slice(0, 10);
 function grupo(e) {
   if (e.estado === 'por_asignar') return 'por_asignar';
   if (e.estado === 'por_revisar') return 'por_revisar';
   if (e.estado === 'aprobado' || e.estado === 'enviado') return 'aprobado';
+  if (e.estado === 'duplicado') return 'duplicado';
   return 'en_proceso';
 }
 const POSTURA_TXT = { apto: 'Apto', apto_con_observacion: 'Con observación', revisar: 'Revisar' };
@@ -323,23 +337,27 @@ async function cargar() {
 function pintaTabs() {
   $('tabs').innerHTML = PESTANAS.map(p => `<button class="tab ${p.k === pestana ? 'on' : ''}" data-k="${p.k}">${p.t}<span class="n">${todos.filter(e => grupo(e) === p.k).length}</span></button>`).join('');
   $('tabs').querySelectorAll('.tab').forEach(b => b.onclick = () => { pestana = b.dataset.k; pintaTabs(); pintaLista(); });
+  $('tab-txt').textContent = PESTANA_TXT[pestana] || '';
 }
 function pintaLista() {
   const f = $('filtro').value.trim().toLowerCase();
-  const xs = todos.filter(e => grupo(e) === pestana).filter(e => !f || (e.paciente + ' ' + e.nombrePdf).toLowerCase().includes(f));
+  const xs = todos.filter(e => grupo(e) === pestana).filter(e => !f || (e.paciente + ' ' + e.nombrePdf).toLowerCase().includes(f))
+    .sort((a, b) => claveFecha(b).localeCompare(claveFecha(a)));
   if (!xs.length) { $('lista').innerHTML = '<div class="results-empty">Nada en esta sección.</div>'; return; }
   $('lista').innerHTML = xs.map(e => `
     <div class="result-item" data-id="${esc(e.id)}">
       <span class="r-name">${esc(e.paciente || e.nombrePdf)}</span>${e.pacienteId ? `<span class="r-id">#${esc(e.pacienteId)}</span>` : ''}
       ${e.postura ? `<span class="pill ${esc(e.postura)}">${esc(POSTURA_TXT[e.postura] || e.postura)}</span>` : ''}
       ${e.llamada ? '<span class="pill llamar">Llamar antes</span>' : ''}
-      ${e.error ? '<span class="pill revisar">Error</span>' : ''}
+      ${e.estado === 'duplicado' ? '<span class="pill">Duplicado</span>' : (e.error && e.estado !== 'por_asignar' ? '<span class="pill revisar">Error</span>' : '')}
       <div class="r-meta">
         <span>${esc(e.tipo || 'laboratorio')}</span><span>Toma ${esc(fecha(e.fechaToma) || '—')}</span>
         ${e.edad ? `<span>${esc(e.edad)} años · ${esc(e.sexo)}</span>` : ''}
         ${e.faltantes ? `<span style="color: var(--warn);">Falta: ${esc(e.faltantes)}</span>` : ''}
       </div>
-      ${e.fuera ? `<div class="r-meta" style="color: var(--error);">${esc(e.fuera)}</div>` : ''}
+      ${e.error && e.estado === 'por_asignar' ? `<div class="r-meta" style="color: var(--warn);">${esc(e.error)}</div>` : ''}
+      ${e.error && e.estado !== 'por_asignar' && e.estado !== 'duplicado' ? `<div class="r-meta" style="color: var(--error);">${esc(e.error)}</div>` : ''}
+      ${e.fuera && e.estado !== 'duplicado' ? `<div class="r-meta" style="color: var(--error);">${esc(e.fuera)}</div>` : ''}
     </div>`).join('');
   $('lista').querySelectorAll('.result-item').forEach(d => d.onclick = () => abrir(d.dataset.id));
 }
